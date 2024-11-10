@@ -3,12 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Página Web</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Generador y Escáner de Códigos de Barras</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .barcode-container, .scan-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        img {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Bienvenido a mi página web</h1>
-    <p>Esta es una página web de ejemplo.</p>
-    <script src="script.js"></script>
+
+    <button onclick="generarCodigoBarra()">Nuevo ticket</button>
+
+    <div id="barcodeContainer" class="barcode-container" style="display:none;">
+        <img id="barcodeImage" alt="Código de Barras">
+        <button onclick="imprimirCodigoBarra()">Imprimir</button>
+    </div>
+
+    <button onclick="escanearCodigoBarra()">Escanear</button>
+
+    <div id="scanInfo" class="scan-info" style="display:none;">
+        <p id="codigoBarraTexto"></p>
+        <p id="fechaHoraEscaneo"></p>
+        <p id="diferenciaTiempo"></p>
+    </div>
+
+    <script>
+        let codigoBarra = '';
+        let fechaHora = '';
+        let fechaHoraEscan = '';
+        let diferencia = '';
+
+        function generarCodigoBarra() {
+            const fechaHoraActual = new Date();
+            fechaHora = fechaHoraActual;
+            codigoBarra = `${fechaHoraActual.toLocaleDateString()} ${fechaHoraActual.toLocaleTimeString()}`;
+            
+            document.getElementById("barcodeContainer").style.display = "block";
+            document.getElementById("barcodeImage").src = `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(codigoBarra)}&code=Code128&dpi=96&dataseparator=`;
+        }
+
+        function imprimirCodigoBarra() {
+            const ventana = window.open('');
+            ventana.document.write(`<img src="https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(codigoBarra)}&code=Code128&dpi=96&dataseparator=">`);
+        }
+
+        function escanearCodigoBarra() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'camera';
+            input.onchange = (e) => {
+                const archivo = e.target.files[0];
+                const lector = new FileReader();
+                lector.onload = () => {
+                    fechaHoraEscan = new Date();
+                    const fechaHoraBarra = new Date(fechaHora);
+                    diferencia = Math.abs(fechaHoraEscan - fechaHoraBarra);
+                    const minutosDiferencia = Math.floor(diferencia / 60000);
+                    
+                    document.getElementById("scanInfo").style.display = "block";
+                    document.getElementById("codigoBarraTexto").innerText = `Fecha y hora del código de barra: ${codigoBarra}`;
+                    document.getElementById("fechaHoraEscaneo").innerText = `Fecha y hora de escaneo: ${fechaHoraEscan.toLocaleString()}`;
+                    document.getElementById("diferenciaTiempo").innerText = `Diferencia: ${minutosDiferencia} minutos`;
+                };
+                lector.readAsText(archivo);
+            };
+            input.click();
+        }
+    </script>
+
 </body>
 </html>
