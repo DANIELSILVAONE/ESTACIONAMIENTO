@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estacionamientos</title>
+    <title>Generador y Escáner de Códigos QR</title>
     <style>
         body {
             display: flex;
@@ -35,6 +35,7 @@
         }
         img {
             margin-top: 10px;
+            max-width: 200px;
         }
         /* Contenedor fijo en la parte inferior */
         .fixed-buttons {
@@ -51,10 +52,10 @@
 </head>
 <body>
 
-    <button onclick="generarCodigoBarra()">Nuevo ticket</button>
+    <button onclick="generarCodigoQR()">Nuevo ticket</button>
 
     <div id="barcodeContainer" class="barcode-container" style="display:none;">
-        <img id="barcodeImage" alt="Código de Barras">
+        <img id="barcodeImage" alt="Código QR">
     </div>
 
     <div id="scanInfo" class="scan-info" style="display:none;">
@@ -65,31 +66,35 @@
 
     <!-- Botones fijos en la parte inferior -->
     <div class="fixed-buttons">
-        <button onclick="imprimirCodigoBarra()">Imprimir</button>
-        <button onclick="escanearCodigoBarra()">Escanear</button>
+        <button onclick="imprimirCodigoQR()">Imprimir</button>
+        <button onclick="escanearCodigoQR()">Escanear</button>
     </div>
 
     <script>
-        let codigoBarra = '';
+        let codigoQR = '';
         let fechaHora = '';
         let fechaHoraEscan = '';
         let diferencia = '';
 
-        function generarCodigoBarra() {
+        function generarCodigoQR() {
             const fechaHoraActual = new Date();
             fechaHora = fechaHoraActual;
-            codigoBarra = `${fechaHoraActual.toLocaleDateString()} ${fechaHoraActual.toLocaleTimeString()}`;
+            codigoQR = `${fechaHoraActual.toLocaleDateString()} ${fechaHoraActual.toLocaleTimeString()}`;
+
+            // Generar código QR usando una API (ejemplo con GoQR.me)
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(codigoQR)}&size=200x200`;
             
+            // Mostrar el QR en la página
             document.getElementById("barcodeContainer").style.display = "block";
-            document.getElementById("barcodeImage").src = `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(codigoBarra)}&code=Code128&dpi=96&dataseparator=`;
+            document.getElementById("barcodeImage").src = qrUrl;
         }
 
-        function imprimirCodigoBarra() {
+        function imprimirCodigoQR() {
             const ventana = window.open('');
-            ventana.document.write(`<img src="https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(codigoBarra)}&code=Code128&dpi=96&dataseparator=">`);
+            ventana.document.write(`<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(codigoQR)}&size=200x200">`);
         }
 
-        function escanearCodigoBarra() {
+        function escanearCodigoQR() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -104,7 +109,7 @@
                     const minutosDiferencia = Math.floor(diferencia / 60000);
                     
                     document.getElementById("scanInfo").style.display = "block";
-                    document.getElementById("codigoBarraTexto").innerText = `Fecha y hora del código de barra: ${codigoBarra}`;
+                    document.getElementById("codigoBarraTexto").innerText = `Fecha y hora del código QR: ${codigoQR}`;
                     document.getElementById("fechaHoraEscaneo").innerText = `Fecha y hora de escaneo: ${fechaHoraEscan.toLocaleString()}`;
                     document.getElementById("diferenciaTiempo").innerText = `Diferencia: ${minutosDiferencia} minutos`;
                 };
