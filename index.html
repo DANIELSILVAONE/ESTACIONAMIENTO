@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador y Escáner de Códigos de Barras</title>
+    <title>Estacionamientos</title>
     <style>
         body {
             display: flex;
@@ -13,6 +13,8 @@
             height: 100vh;
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
+            margin: 0;
+            padding-bottom: 80px; /* Espacio para los botones fijos */
         }
         button {
             background-color: #007bff;
@@ -34,6 +36,17 @@
         img {
             margin-top: 10px;
         }
+        /* Contenedor fijo en la parte inferior */
+        .fixed-buttons {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: #f4f4f4;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -42,15 +55,18 @@
 
     <div id="barcodeContainer" class="barcode-container" style="display:none;">
         <img id="barcodeImage" alt="Código de Barras">
-        <button onclick="imprimirCodigoBarra()">Imprimir</button>
     </div>
-
-    <button onclick="escanearCodigoBarra()">Escanear</button>
 
     <div id="scanInfo" class="scan-info" style="display:none;">
         <p id="codigoBarraTexto"></p>
         <p id="fechaHoraEscaneo"></p>
         <p id="diferenciaTiempo"></p>
+    </div>
+
+    <!-- Botones fijos en la parte inferior -->
+    <div class="fixed-buttons">
+        <button onclick="imprimirCodigoBarra()">Imprimir</button>
+        <button onclick="escanearCodigoBarra()">Escanear</button>
     </div>
 
     <script>
