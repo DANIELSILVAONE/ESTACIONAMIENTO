@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador y Escáner de Códigos QR</title>
+    <title>Generador y Guardado de Códigos QR</title>
     <style>
         body {
             display: flex;
@@ -14,7 +14,7 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
-            padding-bottom: 80px; /* Espacio para los botones fijos */
+            padding-bottom: 80px;
         }
         button {
             background-color: #007bff;
@@ -29,7 +29,7 @@
         button:hover {
             background-color: #0056b3;
         }
-        .barcode-container, .scan-info {
+        .barcode-container {
             margin-top: 20px;
             text-align: center;
         }
@@ -37,7 +37,6 @@
             margin-top: 10px;
             max-width: 200px;
         }
-        /* Contenedor fijo en la parte inferior */
         .fixed-buttons {
             position: fixed;
             bottom: 0;
@@ -58,39 +57,27 @@
         <img id="barcodeImage" alt="Código QR">
     </div>
 
-    <div id="scanInfo" class="scan-info" style="display:none;">
-        <p id="codigoBarraTexto"></p>
-        <p id="fechaHoraEscaneo"></p>
-        <p id="diferenciaTiempo"></p>
-    </div>
-
-    <!-- Botones fijos en la parte inferior -->
     <div class="fixed-buttons">
         <button onclick="imprimirCodigoQR()">Imprimir</button>
-        <button onclick="escanearCodigoQR()">Escanear</button>
+        <button onclick="guardarEnGoogleSheet()">Guardar</button>
     </div>
 
     <script>
         let codigoQR = '';
         let fechaHora = '';
-        let fechaHoraEscan = '';
-        let diferencia = '';
         let ticketID = 1; // ID incremental inicial
+        const scriptURL = 'TU_URL_DE_LA_API_GOOGLE_APPS_SCRIPT'; // URL del Web App
 
         function generarCodigoQR() {
             const fechaHoraActual = new Date();
             fechaHora = fechaHoraActual;
-            // Generar el código QR con la fecha y hora, y el ID único
             codigoQR = `ID: ${ticketID}, Fecha y Hora: ${fechaHoraActual.toLocaleDateString()} ${fechaHoraActual.toLocaleTimeString()}`;
             
-            // Generar código QR usando una API (ejemplo con GoQR.me)
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(codigoQR)}&size=200x200`;
             
-            // Mostrar el QR en la página
             document.getElementById("barcodeContainer").style.display = "block";
             document.getElementById("barcodeImage").src = qrUrl;
 
-            // Incrementar el ID para el próximo ticket
             ticketID++;
         }
 
@@ -99,28 +86,26 @@
             ventana.document.write(`<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(codigoQR)}&size=200x200">`);
         }
 
-        function escanearCodigoQR() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.capture = 'camera';
-            input.onchange = (e) => {
-                const archivo = e.target.files[0];
-                const lector = new FileReader();
-                lector.onload = () => {
-                    fechaHoraEscan = new Date();
-                    const fechaHoraBarra = new Date(fechaHora);
-                    diferencia = Math.abs(fechaHoraEscan - fechaHoraBarra);
-                    const minutosDiferencia = Math.floor(diferencia / 60000);
-                    
-                    document.getElementById("scanInfo").style.display = "block";
-                    document.getElementById("codigoBarraTexto").innerText = `Fecha y hora del código QR: ${codigoQR}`;
-                    document.getElementById("fechaHoraEscaneo").innerText = `Fecha y hora de escaneo: ${fechaHoraEscan.toLocaleString()}`;
-                    document.getElementById("diferenciaTiempo").innerText = `Diferencia: ${minutosDiferencia} minutos`;
-                };
-                lector.readAsText(archivo);
+        function guardarEnGoogleSheet() {
+            const data = {
+                id: ticketID - 1, // Se resta uno ya que se incrementó tras generar el código
+                fechaHora: fechaHora.toLocaleString()
             };
-            input.click();
+
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Datos guardados correctamente en Google Sheets");
+            })
+            .catch(error => {
+                console.error("Error al guardar los datos:", error);
+            });
         }
     </script>
 
