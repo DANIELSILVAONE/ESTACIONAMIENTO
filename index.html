@@ -75,18 +75,23 @@
         let fechaHora = '';
         let fechaHoraEscan = '';
         let diferencia = '';
+        let ticketID = 1; // ID incremental inicial
 
         function generarCodigoQR() {
             const fechaHoraActual = new Date();
             fechaHora = fechaHoraActual;
-            codigoQR = `${fechaHoraActual.toLocaleDateString()} ${fechaHoraActual.toLocaleTimeString()}`;
-
+            // Generar el código QR con la fecha y hora, y el ID único
+            codigoQR = `ID: ${ticketID}, Fecha y Hora: ${fechaHoraActual.toLocaleDateString()} ${fechaHoraActual.toLocaleTimeString()}`;
+            
             // Generar código QR usando una API (ejemplo con GoQR.me)
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(codigoQR)}&size=200x200`;
             
             // Mostrar el QR en la página
             document.getElementById("barcodeContainer").style.display = "block";
             document.getElementById("barcodeImage").src = qrUrl;
+
+            // Incrementar el ID para el próximo ticket
+            ticketID++;
         }
 
         function imprimirCodigoQR() {
